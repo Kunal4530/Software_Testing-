@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Todo List</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f0f0f0;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    .container {
+        max-width: 800px;
+        width: 100%;
+        background-color: #f8f9fa;
+        border-radius: 20px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        padding: 40px;
+        box-sizing: border-box;
+    }
+
+    h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    input[type="text"],
+    input[type="date"] {
+        width: 100%;
+        padding: 15px;
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        box-sizing: border-box;
+        font-size: 18px;
+    }
+
+    button {
+        padding: 15px 30px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 18px;
+        transition: background-color 0.3s;
+    }
+
+    button:hover {
+        background-color: #0056b3;
+    }
+
+    .task {
+        margin-bottom: 20px;
+        border-radius: 12px;
+        padding: 20px;
+        background-color: #ffffff;
+        border: 1px solid #ddd;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s;
+        position: relative;
+    }
+
+    .task h3 {
+        margin: 0 0 10px;
+        font-size: 24px;
+        color: #333;
+    }
+
+    .task p {
+        margin: 0;
+        font-size: 18px;
+        color: #666;
+    }
+
+    .task.done {
+        background-color: #28a745;
+        border-color: #28a745;
+        color: #fff;
+    }
+
+    .delete-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: #dc3545;
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        padding: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s;
+    }
+
+    .delete-button:hover {
+        background-color: #c82333;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Todo List</h1>
+    <form id="todo-form">
+        <input type="text" id="task-input" placeholder="Enter task">
+        <input type="text" id="task-description" placeholder="Enter task description">
+        <input type="date" id="due-date" placeholder="Due Date">
+        <select id="priority-select">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+        </select>
+        <button type="submit">Add Task</button>
+    </form>
+    <input type="text" id="search-input" placeholder="Search tasks">
+    <div id="todo-list">
+        <!-- Tasks will be added here dynamically -->
+    </div>
+</div>
+
+<script>
+    // Function to create new task element
+    function createTaskElement(taskText, taskDescription, dueDate, priority, isDone) {
+        const taskElement = document.createElement('div');
+        taskElement.classList.add('task');
+        if (isDone) {
+            taskElement.classList.add('done');
+        }
+
+        const taskTitleElement = document.createElement('h3');
+        taskTitleElement.textContent = taskText;
+        taskElement.appendChild(taskTitleElement);
+
+        const taskDescriptionElement = document.createElement('p');
+        taskDescriptionElement.textContent = taskDescription;
+        taskElement.appendChild(taskDescriptionElement);
+
+        const dueDateElement = document.createElement('p');
+        dueDateElement.textContent = `Due Date: ${dueDate}`;
+        taskElement.appendChild(dueDateElement);
+
+        const priorityElement = document.createElement('p');
+        priorityElement.textContent = `Priority: ${priority}`;
+        taskElement.appendChild(priorityElement);
+
+        const doneButton = document.createElement('button');
+        doneButton.textContent = 'Done';
+        doneButton.addEventListener('click', function() {
+            taskElement.classList.toggle('done');
+        });
+        taskElement.appendChild(doneButton);
+
+        const updateButton = document.createElement('button');
+        updateButton.textContent = 'Update';
+        updateButton.addEventListener('click', function() {
+            const updatedText = prompt('Enter updated task:', taskText);
+            const updatedDescription = prompt('Enter updated description:', taskDescription);
+            if (updatedText !== null && updatedText.trim() !== '') {
+                taskTitleElement.textContent = updatedText;
+                taskDescriptionElement.textContent = updatedDescription;
+            }
+        });
+        taskElement.appendChild(updateButton);
+
+        const deleteButton = document.createElement('button');
+        deleteButton.classList.add('delete-button');
+        deleteButton.textContent = 'X';
+        deleteButton.addEventListener('click', function() {
+            taskElement.remove();
+        });
+        taskElement.appendChild(deleteButton);
+
+        return taskElement;
+    }
+
+    const todoForm = document.getElementById('todo-form');
+    const todoList = document.getElementById('todo-list');
+    const searchInput = document.getElementById('search-input');
+
+    // Add task event listener
+    todoForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const taskInput = document.getElementById('task-input');
+        const taskDescriptionInput = document.getElementById('task-description');
+        const dueDateInput = document.getElementById('due-date');
+        const prioritySelect = document.getElementById('priority-select');
+        const taskText = taskInput.value.trim();
+        const taskDescription = taskDescriptionInput.value.trim();
+        const dueDate = dueDateInput.value;
+        const priority = prioritySelect.value;
+        if (taskText !== '') {
+            const taskElement = createTaskElement(taskText, taskDescription, dueDate, priority, false);
+            todoList.appendChild(taskElement);
+            taskInput.value = '';
+            taskDescriptionInput.value = '';
+            dueDateInput.value = '';
+            prioritySelect.value = 'low';
+        }
+    });
+
+    // Search tasks event listener
+    searchInput.addEventListener('input', function() {
+        const searchQuery = searchInput.value.trim().toLowerCase();
+        const tasks = todoList.getElementsByClassName('task');
+        Array.from(tasks).forEach(function(task) {
+            const title = task.querySelector('h3').textContent.toLowerCase();
+            const description = task.querySelector('p:nth-of-type(2)').textContent.toLowerCase();
+            if (title.includes(searchQuery) || description.includes(searchQuery)) {
+                task.style.display = 'block';
+            } else {
+                task.style.display = 'none';
+            }
+        });
+    });
+</script>
+</body>
+</html>
